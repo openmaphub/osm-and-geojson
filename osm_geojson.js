@@ -20,8 +20,10 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
             case 'MultiPoint':
                 break;
             case 'LineString':
+                append(lineString(geo, properties)); //if polygon is made with LineString,this working too.
                 break;
             case 'MultiLineString':
+                append(multiLineString(geo, properties));
                 break;
             case 'Polygon':
                 append(polygon(geo, properties));
@@ -34,7 +36,7 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
 
                 for (var i = 0; i < geo.coordinates.length; i++){
 
-                    poly = polygon({
+                    var poly = polygon({
                         'coordinates': geo.coordinates[i]
                     }, undefined, true);
 
@@ -54,7 +56,7 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
             relations += obj.relations;
         }
 
-        osm = '<?xml version="1.0" encoding="UTF-8"?><osm version="0.6" generator="github.com/aaronlidman/osm-and-geojson">' +
+        var osm = '<?xml version="1.0" encoding="UTF-8"?><osm version="0.6" generator="github.com/aaronlidman/osm-and-geojson">' +
         nodes + ways + relations + '</osm>';
         if (osmChange) {
             osm = '<osmChange version="0.6" generator="github.com/aaronlidman/osm-and-geojson"><create>' +
@@ -66,6 +68,46 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
             ways: ways,
             relations: relations,
             osm: osm
+        };
+    }
+
+    function lineString(geo, properties) {
+        var nodes = '',
+            ways = '';
+        var coords = [];
+        ways += '<way id="' + count + '" changeset="' + changeset + '">';
+        count--;
+        for (var i = 0; i <= geo.coordinates.length - 1; i++) {
+            coords.push([geo.coordinates[i][1], geo.coordinates[i][0]]);
+        }
+        coords = createNodes(coords, false);
+        nodes += coords.nodes;
+        ways += coords.nds;
+        ways += propertiesToTags(properties);
+        ways += '</way>';
+        return {
+            nodes: nodes,
+            ways: ways
+        };
+    }
+
+    function multiLineString(geo, properties) {
+        var nodes = '',
+            ways = '';
+        var coords = [];
+        ways += '<way id="' + count + '" changeset="' + changeset + '">';
+        count--;
+        for (var i = 0; i <= geo.coordinates[0].length - 1; i++) {
+            coords.push([geo.coordinates[0][i][1], geo.coordinates[0][i][0]]);
+        }
+        coords = createNodes(coords, false);
+        nodes += coords.nodes;
+        ways += coords.nds;
+        ways += propertiesToTags(properties);
+        ways += '</way>';
+        return {
+            nodes: nodes,
+            ways: ways
         };
     }
 

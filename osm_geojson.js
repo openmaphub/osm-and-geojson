@@ -159,6 +159,7 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
             nodes += coords.nodes;
             ways += coords.nds;
             ways += propertiesToTags(properties);
+            ways += '<tag k="area" v="true"/>'; //flag this area as a polygon
             ways += '</way>';
         }
 

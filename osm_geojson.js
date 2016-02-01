@@ -174,7 +174,14 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
         var tags = '';
         for (var tag in properties) {
             if (properties[tag] !== null) {
-                tags += '<tag k="' + tag + '" v="' + properties[tag] + '"/>';
+                var value = properties[tag]
+                if(value && typeof value === 'string'){
+                  value = value.replace(/"/g,"'");
+                  value = value.replace(/&(?!amp;)/g, "\&amp;");
+                  value = value.replace(/</g,"\&lt;");
+                  value = value.replace(/>/g,"\&gt;");
+                }
+                tags += '<tag k="' + tag + '" v="' + value + '"/>\n';
             }
         }
         return tags;

@@ -11,9 +11,9 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
             case 'Point':
                 var coord = roundCoords([geo.coordinates]);
                 nodes += '<node id="' + count + '" lat="' + coord[0][1] +
-                '" lon="' + coord[0][0] + '" changeset="' + changeset + '">';
+                '" lon="' + coord[0][0] + '" changeset="' + changeset + '">\n';
                 nodes += propertiesToTags(properties);
-                nodes += '</node>';
+                nodes += '</node>\n';
                 count--;
                 break;
 
@@ -30,7 +30,7 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
                 break;
 
             case 'MultiPolygon':
-                relations += '<relation id="' + count + '" changeset="' + changeset + '">';
+                relations += '<relation id="' + count + '" changeset="' + changeset + '">\n';
                 properties.type = 'multipolygon';
                 count--;
 
@@ -46,7 +46,7 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
                 }
 
                 relations += propertiesToTags(properties);
-                relations += '</relation>';
+                relations += '</relation>\n';
                 break;
         }
 
@@ -56,11 +56,11 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
             relations += obj.relations;
         }
 
-        var osm = '<?xml version="1.0" encoding="UTF-8"?><osm version="0.6" generator="github.com/aaronlidman/osm-and-geojson">' +
-        nodes + ways + relations + '</osm>';
+        var osm = '<?xml version="1.0" encoding="UTF-8"?>\n<osm version="0.6" generator="maphubs">\n' +
+        nodes + ways + relations + '</osm>\n';
         if (osmChange) {
-            osm = '<osmChange version="0.6" generator="github.com/aaronlidman/osm-and-geojson"><create>' +
-            nodes + ways + relations + '</create></osmChange>';
+            osm = '<?xml version="1.0" encoding="UTF-8"?>\n<osmChange version="0.6" generator="maphubs">\n<create>\n' +
+            nodes + ways + relations + '</create>\n</osmChange>';
         }
 
         return {
@@ -75,7 +75,7 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
         var nodes = '',
             ways = '';
         var coords = [];
-        ways += '<way id="' + count + '" changeset="' + changeset + '">';
+        ways += '<way id="' + count + '" changeset="' + changeset + '">\n';
         count--;
         for (var i = 0; i <= geo.coordinates.length - 1; i++) {
             coords.push([geo.coordinates[i][1], geo.coordinates[i][0]]);
@@ -84,7 +84,7 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
         nodes += coords.nodes;
         ways += coords.nds;
         ways += propertiesToTags(properties);
-        ways += '</way>';
+        ways += '</way>\n';
         return {
             nodes: nodes,
             ways: ways
@@ -95,7 +95,7 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
         var nodes = '',
             ways = '';
         var coords = [];
-        ways += '<way id="' + count + '" changeset="' + changeset + '">';
+        ways += '<way id="' + count + '" changeset="' + changeset + '">\n';
         count--;
         for (var i = 0; i <= geo.coordinates[0].length - 1; i++) {
             coords.push([geo.coordinates[0][i][1], geo.coordinates[0][i][0]]);
@@ -104,7 +104,7 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
         nodes += coords.nodes;
         ways += coords.nds;
         ways += propertiesToTags(properties);
-        ways += '</way>';
+        ways += '</way>\n';
         return {
             nodes: nodes,
             ways: ways
@@ -122,7 +122,7 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
         var coords = [];
         if (geo.coordinates.length > 1) {
             // polygon with holes -> multipolygon
-            if (!multipolygon) relations += '<relation id="' + count + '" changeset="' + changeset +'">';
+            if (!multipolygon) relations += '<relation id="' + count + '" changeset="' + changeset +'">\n';
             count--;
             properties.type = 'multipolygon';
 
@@ -130,8 +130,8 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
 
                 role = ((i === 0) ? 'outer' : 'inner');
 
-                relations += '<member type="way" ref="' + count + '" role="' + role + '"/>';
-                ways += '<way id="' + count + '" changeset="' + changeset + '">';
+                relations += '<member type="way" ref="' + count + '" role="' + role + '"/>\n';
+                ways += '<way id="' + count + '" changeset="' + changeset + '">\n';
                 count--;
                 for (var a = 0; a < geo.coordinates[i].length-1; a++) {
                     coords.push([geo.coordinates[i][a][1], geo.coordinates[i][a][0]]);
@@ -139,18 +139,18 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
                 coords = createNodes(coords, true);
                 nodes += coords.nodes;
                 ways += coords.nds;
-                ways += '</way>';
+                ways += '</way>\n';
                 coords = [];
             }
 
             if (!multipolygon) {
                 relations += propertiesToTags(properties);
-                relations += '</relation>';
+                relations += '</relation>\n';
             }
         } else {
             // polygon -> way
-            ways += '<way id="' + count + '" changeset="' + changeset + '">';
-            if (multipolygon) relations += '<member type="way" ref="' + count + '" role="outer"/>';
+            ways += '<way id="' + count + '" changeset="' + changeset + '">\n';
+            if (multipolygon) relations += '<member type="way" ref="' + count + '" role="outer"/>\n';
             count--;
             for (var j = 0; j < geo.coordinates[0].length-1; j++) {
                 coords.push([geo.coordinates[0][j][1], geo.coordinates[0][j][0]]);
@@ -159,8 +159,8 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
             nodes += coords.nodes;
             ways += coords.nds;
             ways += propertiesToTags(properties);
-            ways += '<tag k="area" v="true"/>'; //flag this area as a polygon
-            ways += '</way>';
+            ways += '<tag k="area" v="true"/>\n'; //flag this area as a polygon
+            ways += '</way>\n';
         }
 
         return {
@@ -207,11 +207,11 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
         for (var a = 0; a < length; a++) {
             if (repeatLastND && a === 0) repeatLastND = count;
 
-            nds += '<nd ref="' + count + '"/>';
+            nds += '<nd ref="' + count + '"/>\n';
             nodes += '<node id="' + count + '" lat="' + coords[a][0] +'" lon="' + coords[a][1] +
-            '" changeset="' + changeset + '"/>';
+            '" changeset="' + changeset + '"/>\n';
 
-            if (repeatLastND && a === length-1) nds += '<nd ref="' + repeatLastND + '"/>';
+            if (repeatLastND && a === length-1) nds += '<nd ref="' + repeatLastND + '"/>\n';
             count--;
         }
         return {'nds': nds, 'nodes': nodes};
@@ -234,8 +234,8 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
             for (var i = 0; i < geo.features.length; i++){
                 obj.push(togeojson(geo.features[i].geometry, geo.features[i].properties));
             }
-            temp.osm = '<?xml version="1.0" encoding="UTF-8"?><osm version="0.6" generator="github.com/aaronlidman/osm-and-geojson">';
-            if (osmChange) temp.osm = '<osmChange version="0.6" generator="github.com/aaronlidman/osm-and-geojson"><create>';
+            temp.osm = '<?xml version="1.0" encoding="UTF-8"?>\n<osm version="0.6" generator="maphubs">\n';
+            if (osmChange) temp.osm = '<?xml version="1.0" encoding="UTF-8"?>\n<osmChange version="0.6" generator="maphubs">\n<create>\n';
             for (var n = 0; n < obj.length; n++) {
                 temp.nodes += obj[n].nodes;
                 temp.ways += obj[n].ways;
@@ -243,7 +243,7 @@ osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
             }
             temp.osm += temp.nodes + temp.ways + temp.relations;
             if (osmChange) {
-                temp.osm += '</create></osmChange>';
+                temp.osm += '</create>\n</osmChange>';
             } else {
                 temp.osm += '</osm>';
             }
